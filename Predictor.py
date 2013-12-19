@@ -35,6 +35,8 @@ class Predictor:
 
             self.classes = []
 
+            d = .00001
+
             for dir in [(True, spamDict), (False, hamDict)]:
                 # Initialize to zero counts
                 countdict = defaultdict(int, vocab)
@@ -45,12 +47,12 @@ class Predictor:
                 for count in countdict.values():
                     total = total+count
                 # the extra 1 comes from the insertion of an 'unknown' word
-                total = float(total + len(countdict)) + 1
+                total = float(total + d*len(countdict)) + d
 
                 for word in countdict:
-                    countdict[word] = (countdict[word] + 1) / total
+                    countdict[word] = (countdict[word] + d) / total
                 # this will be called for any unseen word
-                countdict['***UNKNOWN***'] = 1/total
+                countdict['***UNKNOWN***'] = d/total
 
                 self.classes.append((dir[0],countdict))
 
@@ -61,52 +63,53 @@ class Predictor:
         False - filename is not spam (is ham)
         '''
         answers = []
-        countdict = self.files2countdict([filename])
+        countdict = self.files2countdict([filename]) #, True)
         for c in self.classes:
             logp = 0
             for word in countdict:
                 #for each word, find the probability that it would appear in c
                 prob = c[1][word];
                 if prob == 0:
-                    prob = c[1]["***UNKNOWN***"]
-                logp = logp + math.log10(prob)
+                    word = "***UNKNOWN***"
+                    prob = c[1][word]
+                logp = logp + math.log10(prob)# * countdict[word]
 
             answers.append((logp,c[0]))
         answers.sort()
         return answers[1][1]
 
-    def files2countdict (self, files,test=False):
+    def files2countdict (self, files):#,test=False):
         """Given an array of filenames, return a dictionary with keys
         being the space-separated, lower-cased words, and the values being
         the number of times that word occurred in the files."""
         d = defaultdict(int)
         for file in files:
+            content = False
             count = 0
-            #skip everything until the first empty line
-            #header=False
             for word in word_tokenize(open(file).read()):
-                if count == 1:
+                if count == 3:
                     domain = word.split('.')[-1]
+                    '''
                     if test:
                         d[domain] += 1
                     else:
-                        d[domain] += 10000
-                    count += 1
-            #for line in open(file).read():
-                #if header:
-                    #for word in line.split():
-                d[self.getWordCase(word)] += 1
+                        d[domain] += 1000
+                    '''
+                    d[domain] += 10000
+                    email = False
+                elif word == "Content-Type":
+                    content = True
+                elif content and len(word)>2:
+                    d[word] += 1000
+                    content = False
+                elif word == "!":
+                    d[word] += 100
+                else:
+                    d[self.getWordCase(word)] += 1
                 count += 1
-                #else:
-                #    if line.strip() == "":
-                #        header=True
-            #if header==False:
-            #    print file
         return d
 
     def getWordCase (self, word):
-        # all upper or something else
-        # all lower case or title
         for c in word[1:]:
             if c.isupper():
                 return word.upper()
