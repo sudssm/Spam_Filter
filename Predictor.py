@@ -20,36 +20,39 @@ class Predictor:
         self.__train__()
 
     def __train__(self):
-        '''train model on spam and ham'''
-        # Set up the vocabulary for all files in the training set
-        vocab = defaultdict(int)
-        print "Training Spam"
-        vocab.update(self.files2countdict(glob.glob(self.__spamFolder+"/*")))
-        print "Training Ham"
-        vocab.update(self.files2countdict(glob.glob(self.__hamFolder+"/*")))
-        # Set all counts to 0
-        vocab = defaultdict(int, zip(vocab.iterkeys(), [0 for i in vocab.values()]))
+            '''train model on spam and ham'''
+            # Set up the vocabulary for all files in the training set
+            vocab = defaultdict(int)
+            print "Parsing Spam"
+            spamDict = self.files2countdict(glob.glob(self.__spamFolder+"/*"))
+            print "Parsing Ham"
+            hamDict = self.files2countdict(glob.glob(self.__hamFolder+"/*"))
 
-        self.classes = []
+            vocab.update(spamDict)
+            vocab.update(hamDict)
+            # Set all counts to 0
+            vocab = defaultdict(int, zip(vocab.iterkeys(), [0 for i in vocab.values()]))
 
-        for dir in [(True, self.__spamFolder), (False, self.__hamFolder)]:
-            # Initialize to zero counts
-            countdict = defaultdict(int, vocab)
-            # Add in counts from this class
-            countdict.update(self.files2countdict(glob.glob(dir[1]+"/*")))
+            self.classes = []
 
-            total = 0
-            for count in countdict.values():
-                total = total+count
-            # the extra 1 comes from the insertion of an 'unknown' word
-            total = float(total + len(countdict)) + 1
+            for dir in [(True, spamDict), (False, hamDict)]:
+                # Initialize to zero counts
+                countdict = defaultdict(int, vocab)
+                # Add in counts from this class
+                countdict.update(dir[1])
 
-            for word in countdict:
-                countdict[word] = (countdict[word] + 1) / total
-            # this will be called for any unseen word
-            countdict['***UNKNOWN***'] = 1/total
+                total = 0
+                for count in countdict.values():
+                    total = total+count
+                # the extra 1 comes from the insertion of an 'unknown' word
+                total = float(total + len(countdict)) + 1
 
-            self.classes.append((dir[0],countdict))
+                for word in countdict:
+                    countdict[word] = (countdict[word] + 1) / total
+                # this will be called for any unseen word
+                countdict['***UNKNOWN***'] = 1/total
+
+                self.classes.append((dir[0],countdict))
 
     def predict(self, filename):
         '''Take in a filename, return whether this file is spam
@@ -87,7 +90,7 @@ class Predictor:
                     if test:
                         d[domain] += 1
                     else:
-                        d[domain] += 10000
+                        d[domain] += 100000
                     count += 1
             #for line in open(file).read():
                 #if header:

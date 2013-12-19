@@ -4,7 +4,7 @@ import glob
 import sys
 import os
 
-usage = sys.argv[0], "[load | train] [testFileOrFolder]"
+usage = sys.argv[0] + " [load | train] [\"\" | test | testFileOrFolder]"
 
 if len(sys.argv) < 2:
   print "Usage:", usage
@@ -28,7 +28,35 @@ else:
   pickle.dump(p, open('predictor.pickle', 'w'))
 
 if len(sys.argv) > 2:
-  if os.path.isdir(sys.argv[2]):
+  if sys.argv[2] == "test":
+    hsuccess=0
+    htotal=0
+    ssuccess=0
+    stotal=0
+    count =0 
+    for line in open("SPAMTrain.label"):
+      count += 1
+      print "\rRunning on Test Data Set:",count,"of",4326,
+      l= line.strip().split()
+      if l[0] == '0':
+        stotal += 1
+        if p.predict("test/" + l[1]) == 1:
+          ssuccess +=1
+      else:
+        htotal += 1
+        if p.predict("test/" + l[1]) == 0:
+          hsuccess +=1
+    print ""
+    print "Ham:"
+    print hsuccess,"of",htotal,"-",100-(100*(hsuccess/float(htotal))),"% Error"
+    print "Spam:"
+    print ssuccess,"of",stotal,"-",100-(100*(ssuccess/float(stotal))),"% Error"
+    print ""
+    print "Total"
+    print hsuccess+ssuccess,"of",htotal+stotal,"-",100-(100*((hsuccess+ssuccess)/float(htotal+stotal))),"% Error"
+
+
+  elif os.path.isdir(sys.argv[2]):
       # predict all files in folder
       for f in glob.glob(sys.argv[2]+'/*'):
           print f, ':', p.predict(f)
