@@ -90,7 +90,7 @@ class Predictor:
                     if test:
                         d[domain] += 1
                     else:
-                        d[domain] += 100000
+                        d[domain] += 10000
                     count += 1
             #for line in open(file).read():
                 #if header:

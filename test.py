@@ -36,7 +36,7 @@ if len(sys.argv) > 2:
     count =0 
     for line in open("SPAMTrain.label"):
       count += 1
-      print "\rRunning on Test Data Set:",count,"of",4326,
+      print "\rRunning on Test Data Set:",count,"of",4327,
       l= line.strip().split()
       if l[0] == '0':
         stotal += 1
