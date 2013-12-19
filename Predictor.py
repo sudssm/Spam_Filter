@@ -67,12 +67,11 @@ class Predictor:
                 prob = c[1][word];
                 if prob == 0:
                     prob = c[1]["***UNKNOWN***"]
-                logp = logp + math.log10(prob)
-
+                logp = logp + math.log10(prob
             answers.append((logp,c[0]))
         answers.sort()
         return answers[1][1]
-
+        
     def files2countdict (self, files, test=False):
         """Given an array of filenames, return a dictionary with keys
         being the space-separated, lower-cased words, and the values being
