@@ -87,7 +87,7 @@ class Predictor:
                     if test:
                         d[domain] += 1
                     else:
-                        d[domain] += 100000
+                        d[domain] += 10000
                     count += 1
             #for line in open(file).read():
                 #if header:
@@ -125,7 +125,7 @@ for testfile in testfiles:
         hsuccess = hsuccess + 1
 print hsuccess,"of",htotal,"-",100-(100*(hsuccess/float(htotal))),"% Error"
 print "Testing Spam:"
-testDir = "spam"
+testDir = "spam-test"
 testfiles = glob.glob(testDir+"/*")
 ssuccess = 0
 stotal = len(testfiles)
