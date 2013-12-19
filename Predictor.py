@@ -110,8 +110,32 @@ class Predictor:
                 return word.upper()
         return word.lower()
 
+#create classifier
+print "Training Classifier"
 p = Predictor("spam", "ham")
-print p.predict("spam/spam1")
-print p.predict("spam/spam2")
-print p.predict("spam/spam3")
-print p.predict("spam/spam4")
+
+# test training data
+print "Testing Dev data"
+testDir = "ham-test"
+testfiles = glob.glob(testDir+"/*")
+print "Testing Ham:"
+hsuccess = 0
+htotal = len(testfiles)
+for testfile in testfiles:
+    if not p.predict(testfile):
+        hsuccess = hsuccess + 1
+print hsuccess,"of",htotal,"-",100-(100*(hsuccess/float(htotal))),"% Error"
+print "Testing Spam:"
+testDir = "spam"
+testfiles = glob.glob(testDir+"/*")
+ssuccess = 0
+stotal = len(testfiles)
+for testfile in testfiles:
+    if p.predict(testfile):
+        ssuccess = ssuccess + 1
+print ssuccess,"of",stotal,"-",100-(100*(ssuccess/float(stotal))),"% Error"
+print ""
+print "Total"
+print hsuccess+ssuccess,"of",htotal+stotal,"-",100-(100*((hsuccess+ssuccess)/float(htotal+stotal))),"% Error"
+
+print ""
