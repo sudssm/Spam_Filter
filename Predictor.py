@@ -127,5 +127,3 @@ print ssuccess,"of",stotal,"-",100-(100*(ssuccess/float(stotal))),"% Error"
 print ""
 print "Total"
 print hsuccess+ssuccess,"of",htotal+stotal,"-",100-(100*((hsuccess+ssuccess)/float(htotal+stotal))),"% Error"
-
-print ""
