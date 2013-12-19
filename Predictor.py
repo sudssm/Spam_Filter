@@ -11,6 +11,7 @@ from collections import defaultdict
 class Predictor:
     '''
     Predictor which will do prediction on emails
+
     '''
     def __init__(self, spamFolder, hamFolder):
         self.__createdAt = time.strftime("%d %b %H:%M:%S", time.gmtime())
@@ -58,7 +59,7 @@ class Predictor:
         False - filename is not spam (is ham)
         '''
         answers = []
-        countdict = self.files2countdict([filename])
+        countdict = self.files2countdict([filename], True)
         for c in self.classes:
             logp = 0
             for word in countdict:
@@ -72,7 +73,7 @@ class Predictor:
         answers.sort()
         return answers[1][1]
 
-    def files2countdict (self, files):
+    def files2countdict (self, files, test=False):
         """Given an array of filenames, return a dictionary with keys
         being the space-separated, lower-cased words, and the values being
         the number of times that word occurred in the files."""
@@ -80,11 +81,20 @@ class Predictor:
         for file in files:
             #skip everything until the first empty line
             #header=False
+            count = 0
             for word in word_tokenize(open(file).read()):
+                if count == 1:
+                    domain = word.split('.')[-1]
+                    if test:
+                       d[domain] += 1
+                    else: 
+                        d[domain] += 5
+                    count += 1
             #for line in open(file).read():
                 #if header:
                     #for word in line.split():
                         d[self.getWordCase(word)] += 1
+                        count += 1
                 #else:
                 #    if line.strip() == "":
                 #        header=True
