@@ -3,6 +3,7 @@ import pickle
 import glob
 import sys
 import os
+import re
 
 usage = sys.argv[0] + " [load | train] [\"\" | test | testFileOrFolder]"
 
@@ -35,31 +36,35 @@ def testExternal ():
   print hsuccess+ssuccess,"of",htotal+stotal,"-",100-(100*((hsuccess+ssuccess)/float(htotal+stotal))),"% Error"
 
 def testDev ():
-
   # test training data
   print "Testing Dev data"
-  testDir = "ham-test"
-  testfiles = glob.glob(testDir+"/*")
-  print "Testing Ham:"
+  testfiles = sorted_nicely(glob.glob("dev/*"))
   hsuccess = 0
-  htotal = len(testfiles)
+  ssuccess = 0
+  stotal = 0
+  htotal = 0
   for testfile in testfiles:
+    if htotal < 200: 
       if not p.predict(testfile):
           hsuccess = hsuccess + 1
-  print hsuccess,"of",htotal,"-",100-(100*(hsuccess/float(htotal))),"% Error"
-  print "Testing Spam:"
-  testDir = "spam-test"
-  testfiles = glob.glob(testDir+"/*")
-  ssuccess = 0
-  stotal = len(testfiles)
-  for testfile in testfiles:
+      htotal += 1
+    else:
       if p.predict(testfile):
-          ssuccess = ssuccess + 1
+        ssuccess = ssuccess + 1
+      stotal += 1
+  print "Ham:"
+  print hsuccess,"of",htotal,"-",100-(100*(hsuccess/float(htotal))),"% Error"
+  print "Spam:"
   print ssuccess,"of",stotal,"-",100-(100*(ssuccess/float(stotal))),"% Error"
   print ""
   print "Total"
   print hsuccess+ssuccess,"of",htotal+stotal,"-",100-(100*((hsuccess+ssuccess)/float(htotal+stotal))),"% Error"
 
+def sorted_nicely( l ): 
+    """ Sort the given iterable in the way that humans expect.""" 
+    convert = lambda text: int(text) if text.isdigit() else text 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(l, key = alphanum_key)
 
 
 if len(sys.argv) < 2:
@@ -90,7 +95,7 @@ if len(sys.argv) > 2:
 
   elif os.path.isdir(sys.argv[2]):
       # predict all files in folder
-      for f in glob.glob(sys.argv[2]+'/*'):
+      for f in sorted_nicely(glob.glob(sys.argv[2]+'/*')):
           print f, ':', p.predict(f)
   elif os.path.isfile(sys.argv[2]):
       # predict this file

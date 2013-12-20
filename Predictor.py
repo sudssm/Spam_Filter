@@ -35,7 +35,7 @@ class Predictor:
 
             self.classes = []
 
-            d = .00001
+            d = .000001
 
             for dir in [(True, spamDict), (False, hamDict)]:
                 # Initialize to zero counts
@@ -70,15 +70,14 @@ class Predictor:
                 #for each word, find the probability that it would appear in c
                 prob = c[1][word];
                 if prob == 0:
-                    word = "***UNKNOWN***"
-                    prob = c[1][word]
-                logp = logp + math.log10(prob)# * countdict[word]
+                    prob = c[1]["***UNKNOWN***"]
+                logp = logp + math.log10(prob) 
 
             answers.append((logp,c[0]))
         answers.sort()
         return answers[1][1]
 
-    def files2countdict (self, files):#,test=False):
+    def files2countdict (self, files):
         """Given an array of filenames, return a dictionary with keys
         being the space-separated, lower-cased words, and the values being
         the number of times that word occurred in the files."""
@@ -88,22 +87,15 @@ class Predictor:
             count = 0
             for word in word_tokenize(open(file).read()):
                 if count == 3:
-                    domain = word.split('.')[-1]
-                    '''
-                    if test:
-                        d[domain] += 1
-                    else:
-                        d[domain] += 1000
-                    '''
+                    domain = ".".join(word.split('.')[-2:])
                     d[domain] += 10000
-                    email = False
                 elif word == "Content-Type":
                     content = True
                 elif content and len(word)>2:
-                    d[word] += 1000
+                    d[word] += 10
                     content = False
                 elif word == "!":
-                    d[word] += 100
+                    d[word] += 10
                 else:
                     d[self.getWordCase(word)] += 1
                 count += 1
